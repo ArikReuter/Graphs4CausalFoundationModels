@@ -3,6 +3,11 @@ src/CausalPriorFitting.egg-info/PKG-INFO
 src/CausalPriorFitting.egg-info/SOURCES.txt
 src/CausalPriorFitting.egg-info/top_level.txt
 
+# Virtual environment
+venv/
+env/
+.venv/
+
 # all .pyc files
 *.pyc
 *.pt
