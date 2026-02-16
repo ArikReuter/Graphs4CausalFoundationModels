@@ -1,77 +1,53 @@
-appdirs==1.4.4
-argon2-cffi==25.1.0
-argon2-cffi-bindings==25.1.0
-black==23.1.0
-blitz-bayesian-pytorch==0.2.7
-botorch==0.8.1
-catboost==1.1.1
-certifi==2025.8.3
-cffi==1.17.1
-charset-normalizer==3.4.3
-click==8.2.1
-cloudpickle==3.1.1
-colorama==0.4.6
-ConfigSpace==0.4.21
-contourpy==1.2.1
-cycler==0.12.1
-Cython==3.1.3
-docker-pycreds==0.4.0
-fonttools==4.59.1
-future==1.0.0
-gitdb==4.0.12
-GitPython==3.1.45
-gpytorch==1.9.1
-graphviz==0.21
-hyperopt==0.2.5
-idna==3.10
-joblib==1.5.1
-kiwisolver==1.4.9
-liac-arff==2.5.0
-lightgbm==3.3.5
-linear-operator==0.3.0
-matplotlib==3.8.4
-minio==7.2.16
-multipledispatch==1.0.0
-mypy_extensions==1.1.0
-narwhals==2.1.2
-networkx==3.4.2
-numpy==1.26.4
-openml==0.12.2
-opt_einsum==3.4.0
-packaging==25.0
-pandas==2.3.1
-pathspec==0.12.1
-pathtools==0.1.2
-pillow==11.3.0
-platformdirs==4.3.8
-plotly==6.3.0
-protobuf==4.25.8
-psutil==7.0.0
-pyarrow==21.0.0
-pycparser==2.22
-pycryptodome==3.23.0
-pyparsing==3.2.3
-pyro-api==0.1.2
-pyro-ppl==1.8.4
-python-dateutil==2.9.0.post0
-pytz==2025.2
-PyYAML==6.0.2
-requests==2.32.4
-scikit-learn==1.2.1
-scipy==1.13.1
-seaborn==0.11.2
-sentry-sdk==2.35.0
-setproctitle==1.3.6
-six==1.17.0
-smmap==5.0.2
-threadpoolctl==3.6.0
-tomli==2.2.1
-torch==2.5.1+cu121
-torchvision==0.20.1+cu121
-tqdm==4.62.1
-typing_extensions==4.14.1
-tzdata==2025.2
-urllib3==2.5.0
-wandb==0.15.8
-xgboost==1.4.0
-xmltodict==0.14.2
+# Core dependencies - Python 3.9+
+numpy>=1.22.0
+scipy>=1.9.0
+pandas>=1.5.0
+scikit-learn>=1.2.0
+
+# Deep Learning - Install with: pip install torch torchvision
+# For CUDA: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# For CPU/MPS (macOS): pip install torch torchvision
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Configuration and utilities
+PyYAML>=6.0
+tqdm>=4.62.0
+pyyaml>=6.0
+
+# Machine Learning libraries
+xgboost>=1.4.0
+catboost>=1.1.0
+lightgbm>=3.3.0
+
+# Plotting and visualization
+matplotlib>=3.5.0
+seaborn>=0.11.0
+plotly>=5.0.0
+
+# Graph utilities
+networkx>=3.0
+graphviz>=0.20
+
+# Bayesian optimization (optional, for hyperparameter tuning)
+gpytorch>=1.9.0
+botorch>=0.8.0
+hyperopt>=0.2.5
+
+# Probabilistic programming (optional, for advanced models)
+pyro-ppl>=1.8.0
+pyro-api>=0.1.2
+
+# Experiment tracking (optional)
+wandb>=0.15.0
+
+# Development tools (optional)
+black>=23.0.0
+
+# Additional utilities
+requests>=2.28.0
+joblib>=1.2.0
+cloudpickle>=2.0.0
+click>=8.0.0  # Relaxed from 8.2.1 which doesn't exist
+packaging>=20.0
+python-dateutil>=2.8.0
