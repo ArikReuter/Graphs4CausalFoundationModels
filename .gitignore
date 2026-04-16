@@ -8,9 +8,23 @@ venv/
 env/
 .venv/
 
+# Secrets and credentials — NEVER commit these
+.env
+.env.*
+*.secret
+*.key
+.netrc
+wandb/
+**/wandb/
+
+# HTCondor submit files (may contain credentials)
+*.sub
+*.condor
+
 # all .pyc files
 *.pyc
 *.pt
+!experiments/checkpoints/no_graph_conditioning/unconditional/best_model.pt
 
 *.err
 *.log
