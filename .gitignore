@@ -25,6 +25,7 @@ wandb/
 *.pyc
 *.pt
 !experiments/checkpoints/no_graph_conditioning/unconditional/best_model.pt
+!experiments/checkpoints/full_conditioned_model/final_earlytest_16773250.0/best_model.pt
 
 *.err
 *.log

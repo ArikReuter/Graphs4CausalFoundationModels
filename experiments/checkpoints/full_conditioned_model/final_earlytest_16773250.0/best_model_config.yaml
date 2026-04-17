@@ -1,0 +1,529 @@
+# ===============================================================================
+# 50-Node IDK Configuration - Graph Conditioning with Partial Knowledge
+# ===============================================================================
+# This configuration uses 50-node graphs with partial graph knowledge (IDK),
+# where some edges are unknown. Uses GCN+AdaLN+soft attention for conditioning.
+#
+# You can specify a prior-distribution over most hyperparamters from which the value will be sampled during training.
+# 
+# ===============================================================================
+
+experiment_name: "final_earlytest"
+description: "Partial graph conditioning with GCN+AdaLN+soft attention, using ancestor matrix with unknown edges, 50 nodes"
+
+mode: "interventional" # determine whether to train in predictive or interventional mode via "predictive" or "interventional"
+
+scm_config:
+  num_nodes:
+    distribution: "discrete_uniform"
+    distribution_parameters:
+      low: 2
+      high: 51
+  graph_edge_prob:
+    distribution: "beta"
+    distribution_parameters:
+      alpha: 2.0
+      beta: 3.0
+  graph_seed:
+    distribution: "discrete_uniform"
+    distribution_parameters:
+      low: 0
+      high: 100000
+  xgboost_prob:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+      - 0.0
+      - 0.1
+      - 0.2
+      - 0.3
+      probabilities:
+      - 0.9
+      - 0.1
+      - 0.01
+      - 0.001
+        #- 0.8
+        #- 0.1
+        #- 0.1
+  mechanism_seed:
+    distribution: "discrete_uniform"
+    distribution_parameters:
+      low: 0
+      high: 100000
+  mlp_nonlins:
+    value: "tabicl"
+  mlp_num_hidden_layers:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - 0
+        - 1
+        - 2
+        - 3
+      probabilities:
+        - 0.875
+        - 0.1
+        - 0.025
+        - 0.01
+  mlp_hidden_dim:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - 1
+        - 2
+        - 4
+        - 6
+        - 8
+        - 10
+        - 12
+        - 14
+        - 16
+        - 32
+      probabilities:
+        - 0.7
+        - 0.2
+        - 0.1
+        - 0.05
+        - 0.04
+        - 0.03
+        - 0.02
+        - 0.01
+        - 0.01
+        - 0.01
+
+  mlp_activation_mode:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - "pre"
+        - "post"
+        - "mixed_in"
+      probabilities:
+        - 0.3
+        - 0.3
+        - 0.3
+
+  # Apply parameter-free BatchNorm to inputs before MLP
+  mlp_use_batch_norm:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - true
+        - false
+      probabilities:
+        - 0.5
+        - 0.5
+      
+  xgb_node_shape:
+    value: [1]
+  xgb_num_hidden_layers:
+    value: 0
+  xgb_hidden_dim:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - 0
+        - 16
+        - 32
+        - 64
+  xgb_activation_mode:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - "pre"
+        - "post"
+        - "mixed_in"
+      probabilities:
+        - 0.33
+        - 0.33
+        - 0.34
+
+  # Apply parameter-free BatchNorm to inputs before XGBoost stack
+  xgb_use_batch_norm:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - true
+        - false
+      probabilities:
+        - 0.5
+        - 0.5
+  xgb_node_shape:
+    value: [1]
+  xgb_n_training_samples:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - 10
+        - 50
+        - 100
+        - 200
+        - 500
+      probabilities:
+        - 0.1
+        - 0.1
+        - 0.3
+        - 0.4
+        - 0.5
+  xgb_add_noise:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - true
+        - false
+      probabilities:
+        - 0.5
+        - 0.5
+  random_additive_std:
+    value: true
+  exo_std_distribution:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - "gamma"
+        - "pareto"
+      probabilities:
+        - 1.0
+        - 0.0
+  endo_std_distribution:
+    distribution: "categorical"
+    distribution_parameters:
+      choices:
+        - "gamma"
+        - "pareto"
+      probabilities:
+        - 1.0
+        - 0.0
+  exo_std_mean:
+    distribution: "lognormal"
+    distribution_parameters:
+      mean: 1.0
+      std: 1.0
+  exo_std_std:
+    distribution: "uniform"
+    distribution_parameters:
+      low: 0.1
+      high: 0.4
+  endo_std_mean:
+    distribution: "lognormal"
+    distribution_parameters:
+      mean: -3.0
+      std: 0.6
+  endo_std_std:
+    distribution: "uniform"
+    distribution_parameters:
+      low: 0.0
+      high: 0.5
+  
+  # Endogenous noise sparsity: probability of zero noise
+  endo_p_zero:
+    value: 0.0
+  
+  # Noise mixture proportions: weights for [Normal, Laplace, StudentT]
+  # Must sum to 1.0. If not specified, uses equal weights [0.333, 0.333, 0.333]
+  noise_mixture_proportions:
+    value: [0.33, 0.33, 0.34] # null = use default equal weights # Example: value: [0.5, 0.3, 0.2]  # 50% Normal, 30% Laplace, 20% StudentT
+  
+  use_exogenous_mechanisms:
+    value: true
+  mechanism_generator_seed:
+    distribution: "discrete_uniform"
+    distribution_parameters:
+      low: 0
+      high: 100000
+
+dataset_config:
+  dataset_size:
+    value: 100000000
+
+  max_number_samples_per_dataset: #actual value of samples (train plus test) per dataset
+    value: 500
+
+  max_number_train_samples_per_dataset:  #how many train samples to actually sample per dataset
+    value: 1000
+  max_number_test_samples_per_dataset:  # how many test samples to actually sample per dataset
+    value: 1000
+  n_test_samples_per_dataset: # how many of the max_number_train_samples_per_dataset to use to pass to the model. the rest will be test samples
+    distribution: "discrete_uniform"
+    distribution_parameters:
+      low: 1
+      high: 500
+
+  # Adjacency matrix output (only used when graph conditioning is enabled)
+  return_adjacency_matrix:  # whether to include adjacency matrix in dataset output
+    value: false  # Will be auto-enabled when use_graph_conditioning=true
+  return_ancestor_matrix:
+    value: true
+
+  # Enable three-state matrix format {-1, 0, 1} for partial graph support
+  use_partial_graph_format:
+    value: true
+  # Fraction of adjacency/ancestor matrix entries to hide (set to 'unknown').
+  # Sampled per-dataset from Uniform(0,1) by default.
+  # Requires use_partial_graph_format=true
+  hide_fraction_matrix:
+    distribution: "uniform"
+    distribution_parameters:
+      low: 0.0
+      high: 1.0
+
+  # Rejection sampling: ensure target variance is sufficiently large
+  # If either train or test target variance falls below this threshold, resample the dataset.
+  # Set to null to disable rejection.
+  min_target_variance:
+    value: 1e-2
+
+  # New unique values threshold (20% by default)
+  min_unique_target_fraction:
+    value: 0.2  # At least 20% of samples must have unique target values
+
+  # Safety cap on number of re-sampling attempts to avoid infinite loops
+  max_resample_attempts:
+    value: 100
+
+
+  max_number_features:
+    value: 50
+  seed:
+    distribution: "discrete_uniform"
+    distribution_parameters:
+      low: 0
+      high: 100000
+
+preprocessing_config:
+  dropout_prob:
+    value: 0.0
+      
+      #- 0.95
+      #- 0.05
+      #- 0.04
+      #- 0.03
+      #- 0.02
+      #- 0.01
+      #- 0.0
+      #- 0.0
+       
+  shuffle_data:
+    value: true
+  target_feature:
+    value: null
+  # Split preprocessing controls: features vs target
+  feature_standardize:
+    value: true
+  feature_negative_one_one_scaling:
+    value: false
+  target_negative_one_one_scaling:
+    value: true
+  remove_outliers:
+    value: true
+  outlier_quantile:
+    value: 0.99
+  yeo_johnson:
+    value: false
+
+  increase_treatment_scale: 
+    value: false
+  distribution_rescale_factor: 
+    value: 0.0
+  interventional_distribution_type:
+    value: "resample"     # can be resampling, uniform, rescaled
+  
+  # Test feature masking: randomly mask a fraction of features in test set only
+  # Creates distribution shift where test has fewer features than train
+  test_feature_mask_fraction:
+    value: 1.0
+  
+  random_seed:
+    distribution: "discrete_uniform"
+    distribution_parameters:
+      low: 0
+      high: 100000
+
+model_config:
+  d_model:
+    value: 256
+  depth: # number of layers
+    value: 6
+  heads_feat:  # number of attention heads for feature-wise attention
+    value: 4
+  heads_samp: # number of attention heads for sample-wise attention
+    value: 4
+  dropout:  # dropout probability
+    value: 0.0
+  hidden_mult: # hidden dimension multiplier in the feedforward layers (usually between 1 and 4)
+    value: 2
+  num_features:
+    value: 50
+  normalize_features:  # whether to apply quantile transform + standard normalization internally
+    value: true
+  
+  # Graph Conditioning Configuration (only applies when mode="interventional")
+  use_graph_conditioning:  # whether to condition on causal graph structure
+    value: true
+  graph_conditioning_mode:  # how to apply graph conditioning
+    value: "partial_gcn_and_soft_attention"
+    # Options:
+    # - "hard_attention_only": GraphConditionedInterventionalPFN with hard attention masking
+    # - "flat_append": FlatGraphConditionedInterventionalPFN (flatten adjacency and append)
+    # - "ultimate_hard_attention_only": UltimateGraphConditionedInterventionalPFN with hard attention masking only (no GCN/AdaLN)
+    # - "ultimate_gcn_only": UltimateGraphConditionedInterventionalPFN with GCN+AdaLN only (no attention masking)
+    # - "ultimate_gcn_and_hard_attention": UltimateGraphConditionedInterventionalPFN with full conditioning (GCN+AdaLN+hard attention masking)
+    # - "ultimate_soft_attention": UltimateGraphConditionedInterventionalPFN with soft attention bias only (no GCN/AdaLN)
+    # - "ultimate_gcn_and_soft_attention": UltimateGraphConditionedInterventionalPFN with full soft conditioning (GCN+AdaLN+soft attention bias)
+    # - "partial_soft_attention": PartialGraphConditionedInterventionalPFN with soft attention for partial graphs (supports -1/0/1 edges)
+    # - "partial_gcn_and_soft_attention": PartialGraphConditionedInterventionalPFN with GCN+AdaLN+soft attention for partial graphs
+  
+  # GCN Configuration (only applies when using GCN-based graph conditioning modes)
+  gcn_use_transpose:  # whether to transpose adjacency matrix in GCN (for "j aggregates from i" convention)
+    value: false
+  gcn_alpha_init:  # initial alpha value for unknown edges in partial graphs (weight for unknown edges)
+    value: 0.1  # Range: (0, 1). Lower = less weight to unknown edges, Higher = more weight
+  
+  # Attention Sink Configuration
+  n_sample_attention_sink_rows:  # number of fixed random rows to prepend as attention sinks (0 = disabled)
+    value: 10
+  n_feature_attention_sink_cols:  # number of fixed random columns to prepend as attention sinks (0 = disabled)
+    value: 0
+
+  # BarDistribution Configuration (used to model the output distribution)
+  use_bar_distribution:
+    value: true
+  num_bars:  # number of bars (K). Higher values allow for more complex, fine-grained posteriors, but make training more difficult.
+    value: 1000
+  min_width:  # minimum width of each bar to avoid numerical issues
+    value: "1e-6"
+  scale_floor:  # for the tails, this ensures that the scale is never too small
+    value: "1e-3"
+  max_fit_items:  # maximum number of datasets to fit the BarDistribution initially.
+    value: 1000
+  max_fit_batches:  # maximum number of batches to use when fitting the BarDistribution initially. This is usually not critical.
+    value: 1000
+  log_prob_clip_min:  # clip minimum log probability to avoid numerical issues
+    value: -100000.00
+  log_prob_clip_max: # clip maximum log probability to avoid numerical issues
+    value: 100000.0
+
+# ===============================================================================
+# Training Configuration 
+# ===============================================================================
+training_config:
+  # Core Training Parameters
+  learning_rate:  # usually 1e-5 - 1e-4 work well
+    value: 0.0001
+  weight_decay: # weight decay for optimizer, might not be needed
+    value: 0.00001 
+  max_steps:  #critial for determing training duration!
+    value: 200000
+  max_epochs: # should always be 1
+    value: 1
+
+  # Data Loading Parameters
+  batch_size: # batch size
+    value: 8
+  accumulate_grad_batches:
+    value: 1
+  num_workers: # number of workers for data loading. You might need a lot because sampling is not super fast.
+    value: 50
+
+
+  # Training Control
+  early_stopping_patience: # patience for early stopping
+    value: 0
+  gradient_clip_val: # gradient clipping value
+    value: 1.0
+  scheduler_type: # learning rate scheduler type. Only linear_warmup_cosine_decay is implemented right now
+    value: "linear_warmup_cosine_decay"
+  warmup_ratio: # warmup ratio for learning rate scheduler
+    value: 0.1
+  min_lr_ratio: # minimum learning rate ratio
+    value: 0.1
+
+  # Checkpointing
+  checkpoint_dir:
+    value: "/fast/arikreuter/DoPFN_v2/CausalPriorFitting/experiments/FirstTests/checkpoints"
+  save_every: # save a checkpoint every n steps
+    value: 20000
+
+  # Hardware Configuration
+  # Hardware Configuration
+  device:
+    value: "cuda"
+  use_amp:  # Enable automatic mixed precision (float16) for faster training on GPU
+    value: true
+  precision: # precision for training. 
+    value: "bf16"
+
+  # Experiment Organization
+  experiment_name: # name of the experiment, used for logging 
+    value: "early_test2" 
+  save_dir:
+    value: "./experiments/FirstTests/logs/early_test2"
+  log_every_n_steps: # how often to log training metrics
+    value: 1
+
+  # Model Checkpointing
+  checkpoint_every_n_steps: # how often to save a model checkpoint
+    value: 20000
+
+  # Evaluation Configuration
+  eval_enabled: # whether to run evaluation during training
+    value: true
+  eval_every: # how often to run evaluation (i.e. every n training steps)
+    value: 20000
+  eval_batches: # number of batches to use for evaluation
+    value: 2
+  eval_dataset_size: # size of the evaluation dataset
+    value: 1000000
+
+  # OpenML Benchmark Integration (run OpenML benchmark during training)
+  # Choose fidelity levels for when to run the external benchmark.
+  # Options: "minimal" (1 task, basic, 1 repeat), "low" (10 tasks, basic, 1 repeat),
+  #          "high" (all tasks, extended, 5 repeats), "very high" (all tasks, extended, 25 repeats)
+  benchmark_enabled: # whether to enable OpenML benchmark
+    value: false  # Set to false to disable, true to enable
+  benchmark_eval_fidelity:
+    value: null  # e.g., "minimal" to run at each evaluation step (null = disabled)
+  benchmark_final_fidelity:
+    value: null  # e.g., "high" to run at the end of training (null = disabled)
+  # Use only cached OpenML data and never download during benchmarking
+  benchmark_offline:
+    value: true
+
+  benchmark_n_estimators: # number of ensemble members for the PFN during benchmarking
+    value: 1
+
+  # Model Selection Configuration
+  model_selection_enabled: # whether to enable model selection for the best model
+    value: true
+  model_selection_metric: # metric to optimize for model selection
+    value: "eval/mse_median"
+  model_selection_mode: # "min"c or "max" depending on whether lower or higher values of the metric are better
+    value: "min"
+
+  # Weights & Biases Integration
+  wandb_project: # project name in wandb
+    value: "DoPFN_v2"
+  wandb_run_name: # run name in wandb
+    value: "basic_10000step_1"
+  wandb_tags:
+    value: ["early_test", "debug", "first_run", "simplepfn"]
+  wandb_notes:
+    value: "First end-to-end pipeline test with wandb integration"
+  wandb_offline: # whether to run wandb in offline mode
+    value: false
+  
+  # LinGaus Benchmark Integration (evaluates on synthetic Linear-Gaussian SCMs)
+  lingaus_benchmark_eval_fidelity: # run LinGaus benchmark at each evaluation step
+    value: null # Options: null (disabled), "low" (100 samples), "high" (1000 samples)
+  lingaus_benchmark_final_fidelity: # run LinGaus benchmark at end of training
+    value: null  # Options: null (disabled), "low" (100 samples), "high" (1000 samples)
+  lingaus_benchmark_dir: # directory containing LinGaus benchmark configs and data
+    value: "/fast/arikreuter/DoPFN_v2/CausalPriorFitting/experiments/FirstTests/checkpoints"  # Results saved to <this_dir>/benchmark_res/
+
+  # ComplexMech Benchmark Integration (evaluates on complex mechanism SCMs)
+  complexmech_benchmark_eval_fidelity: # run ComplexMech benchmark at each evaluation step
+    value: "low" # Options: null (disabled), "low" (100 samples), "high" (1000 samples)
+  complexmech_benchmark_final_fidelity: # run ComplexMech benchmark at end of training
+    value: "high"  # Options: null (disabled), "low" (100 samples), "high" (1000 samples)
+  complexmech_benchmark_dir: # directory containing ComplexMech benchmark configs and data
+    value: "/fast/arikreuter/DoPFN_v2/CausalPriorFitting/experiments/FirstTests/checkpoints"  # Results saved to <this_dir>/benchmark_res/
