@@ -331,7 +331,7 @@ preprocessing_config:
   # Test feature masking: randomly mask a fraction of features in test set only
   # Creates distribution shift where test has fewer features than train
   test_feature_mask_fraction:
-    value: 1.0
+    value: 0.0
   
   random_seed:
     distribution: "discrete_uniform"
@@ -413,7 +413,7 @@ training_config:
   weight_decay: # weight decay for optimizer, might not be needed
     value: 0.00001 
   max_steps:  #critial for determing training duration!
-    value: 200000
+    value: 50000
   max_epochs: # should always be 1
     value: 1
 
@@ -421,7 +421,7 @@ training_config:
   batch_size: # batch size
     value: 8
   accumulate_grad_batches:
-    value: 1
+    value: 4
   num_workers: # number of workers for data loading. You might need a lot because sampling is not super fast.
     value: 50
 
@@ -442,7 +442,7 @@ training_config:
   checkpoint_dir:
     value: "/fast/arikreuter/DoPFN_v2/CausalPriorFitting/experiments/FirstTests/checkpoints"
   save_every: # save a checkpoint every n steps
-    value: 20000
+    value: 5000
 
   # Hardware Configuration
   # Hardware Configuration
@@ -463,13 +463,13 @@ training_config:
 
   # Model Checkpointing
   checkpoint_every_n_steps: # how often to save a model checkpoint
-    value: 20000
+    value: 5000
 
   # Evaluation Configuration
   eval_enabled: # whether to run evaluation during training
     value: true
   eval_every: # how often to run evaluation (i.e. every n training steps)
-    value: 20000
+    value: 100000
   eval_batches: # number of batches to use for evaluation
     value: 2
   eval_dataset_size: # size of the evaluation dataset
