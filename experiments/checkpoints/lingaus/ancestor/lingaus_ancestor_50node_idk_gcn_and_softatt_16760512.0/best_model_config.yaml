@@ -1,16 +1,15 @@
 # ===============================================================================
-# Early Test 1 Configuration - First Pipeline Test
+# 50-Node IDK Configuration - Graph Conditioning with Partial Knowledge
 # ===============================================================================
-# This configuration serves as the initial end-to-end test if
-# training pipeline. It uses minimal settings based on default configurations
-# to ensure quick execution while testing all components.
+# This configuration uses 50-node graphs with partial graph knowledge (IDK),
+# where some edges are unknown. Uses GCN+AdaLN+soft attention for conditioning.
 #
 # You can specify a prior-distribution over most hyperparamters from which the value will be sampled during training.
 # 
 # ===============================================================================
 
-experiment_name: "lingaus_50node_benchmarked_gcn_and_softatt"
-description: ""
+experiment_name: "lingaus_50node_idk_gcn_and_softatt"
+description: "Partial graph conditioning with GCN+AdaLN+soft attention, using ancestor matrix with unknown edges, 50 nodes"
 
 mode: "interventional" # determine whether to train in predictive or interventional mode via "predictive" or "interventional"
 
@@ -235,7 +234,21 @@ dataset_config:
 
   # Adjacency matrix output (only used when graph conditioning is enabled)
   return_adjacency_matrix:  # whether to include adjacency matrix in dataset output
-    value: true  # Will be auto-enabled when use_graph_conditioning=true
+    value: false  # Will be auto-enabled when use_graph_conditioning=true
+  return_ancestor_matrix:
+    value: true
+
+  # Enable three-state matrix format {-1, 0, 1} for partial graph support
+  use_partial_graph_format:
+    value: true
+  # Fraction of adjacency/ancestor matrix entries to hide (set to 'unknown').
+  # Sampled per-dataset from Uniform(0,1) by default.
+  # Requires use_partial_graph_format=true
+  hide_fraction_matrix:
+    distribution: "uniform"
+    distribution_parameters:
+      low: 0.0
+      high: 1.0
 
   # Rejection sampling: ensure target variance is sufficiently large
   # If either train or test target variance falls below this threshold, resample the dataset.
@@ -350,7 +363,7 @@ model_config:
   use_graph_conditioning:  # whether to condition on causal graph structure
     value: true
   graph_conditioning_mode:  # how to apply graph conditioning
-    value: "ultimate_gcn_and_soft_attention"
+    value: "partial_soft_attention"
     # Options:
     # - "hard_attention_only": GraphConditionedInterventionalPFN with hard attention masking
     # - "flat_append": FlatGraphConditionedInterventionalPFN (flatten adjacency and append)
@@ -359,6 +372,14 @@ model_config:
     # - "ultimate_gcn_and_hard_attention": UltimateGraphConditionedInterventionalPFN with full conditioning (GCN+AdaLN+hard attention masking)
     # - "ultimate_soft_attention": UltimateGraphConditionedInterventionalPFN with soft attention bias only (no GCN/AdaLN)
     # - "ultimate_gcn_and_soft_attention": UltimateGraphConditionedInterventionalPFN with full soft conditioning (GCN+AdaLN+soft attention bias)
+    # - "partial_soft_attention": PartialGraphConditionedInterventionalPFN with soft attention for partial graphs (supports -1/0/1 edges)
+    # - "partial_gcn_and_soft_attention": PartialGraphConditionedInterventionalPFN with GCN+AdaLN+soft attention for partial graphs
+  
+  # GCN Configuration (only applies when using GCN-based graph conditioning modes)
+  gcn_use_transpose:  # whether to transpose adjacency matrix in GCN (for "j aggregates from i" convention)
+    value: false
+  gcn_alpha_init:  # initial alpha value for unknown edges in partial graphs (weight for unknown edges)
+    value: 0.1  # Range: (0, 1). Lower = less weight to unknown edges, Higher = more weight
   
   # Attention Sink Configuration
   n_sample_attention_sink_rows:  # number of fixed random rows to prepend as attention sinks (0 = disabled)
@@ -399,13 +420,12 @@ training_config:
     value: 1
 
   # Data Loading Parameters
-  # Data Loading Parameters
   batch_size: # batch size
-    value: 6
+    value: 4
   accumulate_grad_batches:
-    value: 6
+    value: 8
   num_workers: # number of workers for data loading. You might need a lot because sampling is not super fast.
-    value: 70
+    value: 50
 
 
   # Training Control
@@ -426,6 +446,7 @@ training_config:
   save_every: # save a checkpoint every n steps
     value: 5000
 
+  # Hardware Configuration
   # Hardware Configuration
   device:
     value: "cuda"
@@ -495,7 +516,7 @@ training_config:
   
   # LinGaus Benchmark Integration (evaluates on synthetic Linear-Gaussian SCMs)
   lingaus_benchmark_eval_fidelity: # run LinGaus benchmark at each evaluation step
-    value: low  # Options: null (disabled), "low" (100 samples), "high" (1000 samples)
+    value: "low"  # Options: null (disabled), "low" (100 samples), "high" (1000 samples)
   lingaus_benchmark_final_fidelity: # run LinGaus benchmark at end of training
     value: "high"  # Options: null (disabled), "low" (100 samples), "high" (1000 samples)
   lingaus_benchmark_dir: # directory containing LinGaus benchmark configs and data

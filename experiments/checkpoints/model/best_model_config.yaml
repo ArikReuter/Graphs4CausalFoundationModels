@@ -18,7 +18,7 @@ scm_config:
     distribution: "discrete_uniform"
     distribution_parameters:
       low: 2
-      high: 51
+      high: 50
   graph_edge_prob:
     distribution: "beta"
     distribution_parameters:
@@ -30,18 +30,7 @@ scm_config:
       low: 0
       high: 100000
   xgboost_prob:
-    distribution: "categorical"
-    distribution_parameters:
-      choices:
-      - 0.0
-      - 0.1
-      - 0.2
-      - 0.3
-      probabilities:
-      - 0.9
-      - 0.1
-      - 0.01
-      - 0.001
+    value: 0.0
         #- 0.8
         #- 0.1
         #- 0.1
@@ -51,20 +40,14 @@ scm_config:
       low: 0
       high: 100000
   mlp_nonlins:
-    value: "tabicl"
+    value: "id"
   mlp_num_hidden_layers:
     distribution: "categorical"
     distribution_parameters:
       choices:
         - 0
-        - 1
-        - 2
-        - 3
       probabilities:
-        - 0.875
-        - 0.1
-        - 0.025
-        - 0.01
+        - 1.0
   mlp_hidden_dim:
     distribution: "categorical"
     distribution_parameters:
@@ -99,9 +82,9 @@ scm_config:
         - "post"
         - "mixed_in"
       probabilities:
-        - 0.3
-        - 0.3
-        - 0.3
+        - 0.5
+        - 0.5
+        - 0.0
 
   # Apply parameter-free BatchNorm to inputs before MLP
   mlp_use_batch_norm:
@@ -111,8 +94,8 @@ scm_config:
         - true
         - false
       probabilities:
-        - 0.5
-        - 0.5
+        - 1.0
+        - 0.0
       
   xgb_node_shape:
     value: [1]
@@ -222,10 +205,10 @@ scm_config:
   # Noise mixture proportions: weights for [Normal, Laplace, StudentT]
   # Must sum to 1.0. If not specified, uses equal weights [0.333, 0.333, 0.333]
   noise_mixture_proportions:
-    value: [0.33, 0.33, 0.34] # null = use default equal weights # Example: value: [0.5, 0.3, 0.2]  # 50% Normal, 30% Laplace, 20% StudentT
+    value: [1.0, 0.0, 0.0] # null = use default equal weights # Example: value: [0.5, 0.3, 0.2]  # 50% Normal, 30% Laplace, 20% StudentT
   
   use_exogenous_mechanisms:
-    value: true
+    value: false
   mechanism_generator_seed:
     distribution: "discrete_uniform"
     distribution_parameters:
