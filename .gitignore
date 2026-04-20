@@ -27,6 +27,7 @@ wandb/
 !experiments/checkpoints/no_graph_conditioning/unconditional/best_model.pt
 !experiments/checkpoints/full_conditioned_model/final_earlytest_16773250.0/best_model.pt
 !experiments/checkpoints/lingaus/ancestor/lingaus_ancestor_50node_idk_gcn_and_softatt_16760512.0/best_model.pt
+!experiments/checkpoints/lingaus/lingaus_ancestor_5node_idk_gcn_and_softatt_16751139.0/final_model_with_bardist.pt
 
 *.err
 *.log
